@@ -1,0 +1,298 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add any global styles below */
+body {
+  @apply antialiased;
+}
+
+/* Add these styles for the carousel dots */
+.slick-dots {
+  bottom: 20px;
+}
+
+.slick-dots li button:before {
+  color: #EBC17D !important;
+  font-size: 12px !important;
+}
+
+.slick-dots li.slick-active button:before {
+  color: #EBC17D !important;
+}
+
+/* Add this for proper aspect ratio handling */
+.aspect-w-16 {
+  position: relative;
+  padding-bottom: 56.25%;
+}
+
+.aspect-w-16 > * {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.marquee {
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  min-width: 100%;
+  animation: marquee 30s linear infinite;
+}
+
+.marquee:nth-child(2) {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  animation: marquee 30s linear infinite;
+}
+
+/* Optional: Pause animation on hover */
+.marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Custom styles for react-datepicker */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker {
+  font-family: inherit !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.react-datepicker__header {
+  background-color: #05190E !important;
+  border-bottom: none !important;
+  border-radius: 0.5rem 0.5rem 0 0 !important;
+  padding-top: 0.8rem !important;
+}
+
+.react-datepicker__current-month {
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+}
+
+.react-datepicker__day-name {
+  color: #EBC17D !important;
+}
+
+.react-datepicker__day--selected {
+  background-color: #05190E !important;
+  color: white !important;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background-color: #C08329 !important;
+  color: white !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: #EBC17D !important;
+  color: #05190E !important;
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: #EBC17D !important;
+}
+
+.react-datepicker__day--disabled {
+  color: #ccc !important;
+}
+
+/* DatePicker Custom Styles */
+.booking-datepicker {
+  @apply font-sans border-none shadow-lg rounded-lg overflow-hidden;
+  background-color: white;
+}
+
+.react-datepicker {
+  @apply border-0 font-sans;
+}
+
+.react-datepicker__header {
+  @apply bg-[#05190E] border-none rounded-t-lg pt-4 pb-2;
+}
+
+.react-datepicker__current-month {
+  @apply text-white font-semibold mb-2;
+}
+
+.react-datepicker__day-name {
+  @apply text-[#EBC17D] font-medium;
+}
+
+.react-datepicker__day {
+  @apply hover:bg-[#EBC17D] hover:text-[#05190E] rounded-full transition-colors;
+}
+
+.react-datepicker__day--selected {
+  @apply bg-[#05190E] text-white rounded-full;
+}
+
+.react-datepicker__day--keyboard-selected {
+  @apply bg-[#C08329] text-white rounded-full;
+}
+
+.react-datepicker__day--disabled {
+  @apply text-gray-400 hover:bg-transparent cursor-not-allowed;
+}
+
+.react-datepicker__navigation {
+  @apply top-3;
+}
+
+.react-datepicker__navigation-icon::before {
+  @apply border-[#EBC17D];
+}
+
+.react-datepicker__day--today {
+  @apply font-bold text-[#C08329];
+}
+
+.react-datepicker__triangle {
+  display: none;
+}
+
+.booking-datepicker-popper {
+  @apply z-[1000];
+}
+
+/* Calendar Input Styles */
+.react-datepicker__input-container input {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EBC17D] cursor-pointer;
+}
+
+.react-datepicker-wrapper {
+  @apply w-full;
+}
+
+/* Month Navigation Buttons */
+.react-datepicker__navigation-icon {
+  @apply relative;
+}
+
+.react-datepicker__navigation--previous {
+  @apply left-2;
+}
+
+.react-datepicker__navigation--next {
+  @apply right-2;
+}
+
+/* Week Days Row */
+.react-datepicker__day-names {
+  @apply bg-[#05190E] pb-2;
+}
+
+/* Calendar Days */
+.react-datepicker__month {
+  @apply mt-0 p-2;
+}
+
+.react-datepicker__day {
+  @apply m-1 w-8 h-8 leading-8 text-center;
+}
+
+/* Today's Date */
+.react-datepicker__day--today {
+  @apply border-2 border-[#EBC17D];
+}
+
+/* Selected Date */
+.react-datepicker__day--selected,
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range {
+  @apply bg-[#05190E] text-white;
+}
+
+/* Hover Effect */
+.react-datepicker__day:hover {
+  @apply bg-[#EBC17D] text-[#05190E];
+}
+
+/* Add these styles for toast customization */
+.custom-toast {
+  @apply rounded-lg shadow-xl border-2 border-[#EBC17D];
+}
+
+.custom-toast-success {
+  @apply bg-[#05190E] text-white;
+}
+
+.custom-toast-error {
+  @apply bg-[#05190E] text-white;
+}
+
+/* Add these responsive styles */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .react-datepicker {
+    font-size: 0.9rem;
+  }
+  
+  .react-datepicker__day {
+    width: 1.7rem;
+    height: 1.7rem;
+    line-height: 1.7rem;
+  }
+}
+
+/* Ensure proper touch targets on mobile */
+@media (max-width: 768px) {
+  button, 
+  [role="button"],
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  input,
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+}
+
+/* Add these styles for better mobile handling */
+html, body {
+  @apply overflow-x-hidden;
+}
+
+/* Ensure video covers full viewport */
+.video-container {
+  @apply h-screen w-full relative overflow-hidden;
+}
+
+.video-container video {
+  @apply absolute top-0 left-0 w-full h-full object-cover;
+}
+
+/* Adjust content for different screen sizes */
+@media (max-width: 640px) {
+  .h-screen {
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+} 
