@@ -48,7 +48,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
 
   const fetchBlockedDates = async () => {
     try {
-      const response = await fetch('/api/google-calendar/events');  // This is the correct path
+      const response = await fetch('/api/google-calendar/events');  // Use the API route path
       if (!response.ok) throw new Error('Failed to fetch calendar events');
       const { events }: { events: CalendarEvent[] } = await response.json();
       

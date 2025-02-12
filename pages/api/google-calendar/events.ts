@@ -12,20 +12,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       throw new Error('Required environment variables are not set');
     }
 
-    // Create JWT client
-    const jwtClient = new google.auth.JWT({
-      email: process.env.GOOGLE_CLIENT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    // Create auth client with complete credentials object
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      },
       scopes: ['https://www.googleapis.com/auth/calendar.readonly'],
     });
 
-    // Authorize the client
-    await jwtClient.authorize();
+    const calendar = google.calendar({ version: 'v3', auth });
 
-    // Create calendar client
-    const calendar = google.calendar({ version: 'v3', auth: jwtClient });
-
-    // Get events
     const response = await calendar.events.list({
       calendarId: process.env.GOOGLE_CALENDAR_ID,
       timeMin: new Date().toISOString(),
