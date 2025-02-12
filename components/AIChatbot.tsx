@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaComments, FaTimes, FaPaperPlane } from 'react-icons/fa';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 const AIChatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,6 +10,7 @@ const AIChatbot: React.FC = () => {
     { text: "Hi! How can I help you today?", isUser: false }
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,7 +21,25 @@ const AIChatbot: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
 
-    // Send to FormSubmit
+    // If message contains calendar-related keywords, show DatePicker
+    if (inputMessage.toLowerCase().includes('calendar') || 
+        inputMessage.toLowerCase().includes('schedule') || 
+        inputMessage.toLowerCase().includes('booking')) {
+      setMessages(prev => [...prev, {
+        text: "Please select your preferred date:",
+        isUser: false
+      }]);
+      // Add DatePicker message
+      setMessages(prev => [...prev, {
+        text: `<div class="w-full">
+          <div class="booking-datepicker-container"></div>
+        </div>`,
+        isUser: false
+      }]);
+      return;
+    }
+
+    // Regular form submission for other messages
     try {
       await fetch('https://formsubmit.co/ajax/locuseventsinc@gmail.com', {
         method: 'POST',
@@ -33,7 +54,6 @@ const AIChatbot: React.FC = () => {
         })
       });
 
-      // Add response message
       setMessages(prev => [...prev, {
         text: "Thanks for your message! We'll get back to you soon.",
         isUser: false
@@ -46,8 +66,36 @@ const AIChatbot: React.FC = () => {
     }
   };
 
+  // Add this CSS to match the BookingModal styles
+  const datePickerStyles = `
+    .booking-datepicker-container .react-datepicker {
+      font-family: inherit;
+      border: 1px solid #EBC17D;
+      border-radius: 0.5rem;
+    }
+    .booking-datepicker-container .react-datepicker__header {
+      background-color: #05190E;
+      color: white;
+      border-bottom: 1px solid #EBC17D;
+    }
+    .booking-datepicker-container .react-datepicker__current-month {
+      color: white;
+    }
+    .booking-datepicker-container .react-datepicker__day-name {
+      color: #EBC17D;
+    }
+    .booking-datepicker-container .react-datepicker__day--selected {
+      background-color: #05190E;
+      color: white;
+    }
+    .booking-datepicker-container .react-datepicker__day:hover {
+      background-color: #EBC17D;
+    }
+  `;
+
   return (
     <>
+      <style>{datePickerStyles}</style>
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(true)}
@@ -90,9 +138,8 @@ const AIChatbot: React.FC = () => {
                         ? 'bg-[#05190E] text-white'
                         : 'bg-[#F4E8D9] text-[#05190E]'
                     }`}
-                  >
-                    {message.text}
-                  </div>
+                    dangerouslySetInnerHTML={{ __html: message.text }}
+                  />
                 </div>
               ))}
             </div>

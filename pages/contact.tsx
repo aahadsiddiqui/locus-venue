@@ -206,7 +206,7 @@ const ContactPage = () => {
                   <FaPhone className="text-2xl text-[#C08329] mt-1" />
                   <div>
                     <h3 className="font-semibold text-[#05190E]">Phone</h3>
-                    <p className="text-[#C08329]">+1 (416) 123-4567</p>
+                    <p className="text-[#C08329]">+1 (647) 989-2753</p>
                   </div>
                 </div>
 
@@ -214,7 +214,7 @@ const ContactPage = () => {
                   <FaEnvelope className="text-2xl text-[#C08329] mt-1" />
                   <div>
                     <h3 className="font-semibold text-[#05190E]">Email</h3>
-                    <p className="text-[#C08329]">info@locusvenue.com</p>
+                    <p className="text-[#C08329]">locuseventsinc@gmail.com</p>
                   </div>
                 </div>
 

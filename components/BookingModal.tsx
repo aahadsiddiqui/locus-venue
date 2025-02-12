@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaCalendar, FaUsers, FaEnvelope, FaPhone, FaUser } from 'react-icons/fa';
+import { Toaster, toast } from 'react-hot-toast';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { Toaster, toast } from 'react-hot-toast';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -20,6 +20,12 @@ interface BookingForm {
   additionalNotes: string;
 }
 
+// Add interface for calendar events
+interface CalendarEvent {
+  start: { dateTime?: string; date?: string };
+  end: { dateTime?: string; date?: string };
+}
+
 const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState<BookingForm>({
     name: '',
@@ -30,6 +36,49 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
     guestCount: '',
     additionalNotes: '',
   });
+
+  const [blockedDates, setBlockedDates] = useState<Date[]>([]);
+  
+  // Fetch blocked dates when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchBlockedDates();
+    }
+  }, [isOpen]);
+
+  const fetchBlockedDates = async () => {
+    try {
+      const response = await fetch('/api/google-calendar/events');  // This is the correct path
+      if (!response.ok) throw new Error('Failed to fetch calendar events');
+      const { events }: { events: CalendarEvent[] } = await response.json();
+      
+      // Convert events to blocked dates
+      const dates = events.map(event => new Date(event.start.dateTime || event.start.date || ''));
+      setBlockedDates(dates);
+    } catch (error) {
+      console.error('Error fetching blocked dates:', error);
+      toast.error(
+        <div className="font-medium">
+          Unable to load calendar availability. Please try again later.
+        </div>,
+        {
+          duration: 4000,
+          style: {
+            background: '#05190E',
+            color: '#FFFFFF',
+            border: '2px solid #EBC17D',
+          },
+        }
+      );
+    }
+  };
+
+  // Function to check if a date should be blocked
+  const isDateBlocked = (date: Date) => {
+    return blockedDates.some(blockedDate => 
+      blockedDate.toDateString() === date.toDateString()
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,45 +121,45 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
         })
       });
 
-      if (response.ok) {
-        // Close modal first
-        onClose();
-        
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          eventDate: null,
-          eventType: '',
-          guestCount: '',
-          additionalNotes: '',
-        });
-
-        // Show success toast
-        toast.success(
-          <div className="flex flex-col">
-            <span className="font-bold text-lg mb-1">Booking Request Sent!</span>
-            <span className="text-sm">
-              Thank you for choosing Locus Venue. We will contact you shortly to confirm your booking details.
-            </span>
-          </div>,
-          {
-            duration: 5000,
-            style: {
-              background: '#05190E',
-              color: '#FFFFFF',
-              border: '2px solid #EBC17D',
-              padding: '16px',
-              minWidth: '300px',
-            },
-            icon: '🎉',
-          }
-        );
-      } else {
-        throw new Error('Form submission failed');
+      if (!response.ok) {
+        throw new Error('Failed to send booking request');
       }
+
+      // Close modal first
+      onClose();
+      
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        eventDate: null,
+        eventType: '',
+        guestCount: '',
+        additionalNotes: '',
+      });
+
+      toast.success(
+        <div className="flex flex-col">
+          <span className="font-bold text-lg mb-1">Booking Request Sent!</span>
+          <span className="text-sm">
+            Thank you for choosing Locus Venue. We will contact you shortly to confirm your booking details.
+          </span>
+        </div>,
+        {
+          duration: 5000,
+          style: {
+            background: '#05190E',
+            color: '#FFFFFF',
+            border: '2px solid #EBC17D',
+            padding: '16px',
+            minWidth: '300px',
+          },
+          icon: '🎉',
+        }
+      );
     } catch (error) {
+      console.error('Error:', error);
       toast.error(
         <div className="font-medium">
           Error sending booking request. Please try again or contact us directly.
@@ -154,38 +203,38 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4"
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2"
             onClick={onClose}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-2xl w-full max-w-2xl max-h-[95vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
-              <div className="bg-[#05190E] text-white p-4 sm:p-6 relative">
-                <h2 className="text-xl sm:text-2xl font-bold">Book Your Event</h2>
-                <p className="text-[#EBC17D] mt-2 text-sm sm:text-base">Fill in the details below to request a booking</p>
+              {/* Header - Made more compact */}
+              <div className="bg-[#05190E] text-white p-3 sm:p-4 relative">
+                <h2 className="text-lg sm:text-xl font-bold">Book Your Event</h2>
+                <p className="text-[#EBC17D] mt-1 text-sm">Fill in the details below</p>
                 <button
                   onClick={onClose}
-                  className="absolute top-4 sm:top-6 right-4 sm:right-6 text-white/80 hover:text-white transition-colors"
+                  className="absolute top-3 right-3 text-white/80 hover:text-white"
                 >
-                  <FaTimes className="text-lg sm:text-xl" />
+                  <FaTimes />
                 </button>
               </div>
 
-              {/* Form */}
+              {/* Form - Adjusted spacing */}
               <form 
                 onSubmit={handleSubmit}
-                className="p-4 sm:p-6 space-y-4 sm:space-y-6"
+                className="p-3 sm:p-4 space-y-3 sm:space-y-4"
               >
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {/* Personal Information */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-[#05190E] mb-2">
+                      <label className="block text-sm font-medium text-[#05190E] mb-1">
                         <FaUser className="inline mr-2" />
                         Full Name *
                       </label>
@@ -195,12 +244,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
                         required
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EBC17D]"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#EBC17D]"
                         placeholder="John Doe"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#05190E] mb-2">
+                      <label className="block text-sm font-medium text-[#05190E] mb-1">
                         <FaEnvelope className="inline mr-2" />
                         Email *
                       </label>
@@ -210,12 +259,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
                         required
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EBC17D]"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#EBC17D]"
                         placeholder="john@example.com"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#05190E] mb-2">
+                      <label className="block text-sm font-medium text-[#05190E] mb-1">
                         <FaPhone className="inline mr-2" />
                         Phone Number *
                       </label>
@@ -225,16 +274,16 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
                         required
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EBC17D]"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#EBC17D]"
                         placeholder="(123) 456-7890"
                       />
                     </div>
                   </div>
 
-                  {/* Event Details */}
-                  <div className="space-y-4">
+                  {/* Event Details - Calendar made more compact */}
+                  <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-[#05190E] mb-2">
+                      <label className="block text-sm font-medium text-[#05190E] mb-1">
                         <FaCalendar className="inline mr-2" />
                         Event Date *
                       </label>
@@ -242,28 +291,17 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
                         selected={formData.eventDate}
                         onChange={(date: Date) => setFormData({ ...formData, eventDate: date })}
                         minDate={new Date()}
+                        filterDate={date => !isDateBlocked(date)}
                         dateFormat="EEEE, MMMM d, yyyy"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EBC17D] cursor-pointer"
-                        placeholderText="Click to select a date"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#EBC17D]"
+                        placeholderText="Select date"
                         required
-                        showPopperArrow={false}
-                        popperClassName="booking-datepicker-popper"
-                        calendarClassName="booking-datepicker"
-                        popperPlacement="bottom-start"
-                        fixedHeight
-                        monthsShown={1}
-                        shouldCloseOnSelect={true}
-                        customInput={
-                          <input
-                            type="text"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EBC17D] cursor-pointer"
-                            placeholder="Click to select a date"
-                          />
-                        }
+                        inline
+                        calendarClassName="booking-calendar !w-full sm:!w-[280px]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#05190E] mb-2">
+                      <label className="block text-sm font-medium text-[#05190E] mb-1">
                         Event Type *
                       </label>
                       <select
@@ -271,7 +309,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
                         required
                         value={formData.eventType}
                         onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EBC17D]"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#EBC17D]"
                       >
                         <option value="">Select Event Type</option>
                         <option value="Wedding">Wedding</option>
@@ -282,7 +320,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#05190E] mb-2">
+                      <label className="block text-sm font-medium text-[#05190E] mb-1">
                         <FaUsers className="inline mr-2" />
                         Expected Guest Count *
                       </label>
@@ -294,42 +332,42 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
                         max="200"
                         value={formData.guestCount}
                         onChange={(e) => setFormData({ ...formData, guestCount: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EBC17D]"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#EBC17D]"
                         placeholder="Number of guests (1-200)"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Additional Notes */}
+                {/* Additional Notes - More compact */}
                 <div>
-                  <label className="block text-sm font-medium text-[#05190E] mb-2">
+                  <label className="block text-sm font-medium text-[#05190E] mb-1">
                     Additional Notes
                   </label>
                   <textarea
                     name="additionalNotes"
                     value={formData.additionalNotes}
                     onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EBC17D]"
-                    rows={4}
-                    placeholder="Any special requirements or questions?"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#EBC17D]"
+                    rows={3}
+                    placeholder="Any special requirements?"
                   />
                 </div>
 
-                {/* Submit Button */}
-                <div className="flex justify-end space-x-4">
+                {/* Submit Buttons - More compact */}
+                <div className="flex justify-end space-x-3 pt-2">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-6 py-2 border border-[#05190E] text-[#05190E] rounded-lg hover:bg-gray-50 transition-colors"
+                    className="px-4 py-2 text-sm border border-[#05190E] text-[#05190E] rounded-lg hover:bg-gray-50"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-[#05190E] text-white rounded-lg hover:bg-[#C08329] transition-colors"
+                    className="px-4 py-2 text-sm bg-[#05190E] text-white rounded-lg hover:bg-[#C08329]"
                   >
-                    Submit Booking Request
+                    Submit Request
                   </button>
                 </div>
               </form>
