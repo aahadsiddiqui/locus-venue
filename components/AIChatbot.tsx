@@ -37,9 +37,18 @@ const AIChatbot: React.FC = () => {
 
     // Handle the conversation flow
     if (currentStep === 'initial') {
-      if (inputMessage.toLowerCase().includes('book') || 
-          inputMessage.toLowerCase().includes('reserve') || 
-          inputMessage.toLowerCase().includes('schedule')) {
+      const lowerMsg = inputMessage.toLowerCase().trim();
+      if (
+        lowerMsg.includes('book') ||
+        lowerMsg.includes('reserve') ||
+        lowerMsg.includes('schedule') ||
+        lowerMsg === 'yes' ||
+        lowerMsg === 'yep' ||
+        lowerMsg === 'yeah' ||
+        lowerMsg === 'sure' ||
+        lowerMsg === 'ok' ||
+        lowerMsg === 'okay'
+      ) {
         setCurrentStep('name');
         setMessages(prev => [...prev, {
           text: "Great! Let's get started with your booking. What's your full name?",
