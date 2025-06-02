@@ -11,7 +11,7 @@ export default async function handler(
   const { name, email, phone, eventDate, eventType, guestCount, additionalNotes } = req.body;
 
   try {
-    const response = await fetch('https://formsubmit.co/ajax/locuseventsinc@gmail.com', {
+    const response = await fetch('https://formsubmit.co/ajax/430f12921ff038dc722474cb2e092d31', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,6 +19,10 @@ export default async function handler(
       },
       body: JSON.stringify({
         _subject: "New Booking Request from Locus Venue",
+        _template: "table",
+        _captcha: "false",
+        _autoresponse: "Thank you for your booking request. We will contact you shortly to confirm your event details.",
+        _replyto: email,
         name,
         email,
         phone,

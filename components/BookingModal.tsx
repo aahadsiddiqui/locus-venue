@@ -48,15 +48,21 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
 
   const fetchBlockedDates = async () => {
     try {
-      const response = await fetch('/api/google-calendar/events');  // Use the API route path
-      if (!response.ok) throw new Error('Failed to fetch calendar events');
-      const { events }: { events: CalendarEvent[] } = await response.json();
+      const response = await fetch('/api/google-calendar/events');
+      const data = await response.json();
       
+      if (!response.ok) {
+        // Log the error details from the API
+        console.error('API Error:', data);
+        throw new Error(data.details || 'Failed to fetch calendar events');
+      }
+
       // Convert events to blocked dates
-      const dates = events.map(event => new Date(event.start.dateTime || event.start.date || ''));
+      const dates = data.events.map(event => new Date(event.start.dateTime || event.start.date || ''));
       setBlockedDates(dates);
     } catch (error) {
       console.error('Error fetching blocked dates:', error);
+      // Show a more user-friendly error message
       toast.error(
         <div className="font-medium">
           Unable to load calendar availability. Please try again later.

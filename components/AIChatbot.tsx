@@ -3,6 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaComments, FaTimes, FaPaperPlane } from 'react-icons/fa';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { useBookingModal } from '../contexts/BookingModalContext';
+
+interface UserInfo {
+  name: string;
+  email: string;
+  phone: string;
+}
 
 const AIChatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +18,13 @@ const AIChatbot: React.FC = () => {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const { openBookingModal } = useBookingModal();
+  const [userInfo, setUserInfo] = useState<UserInfo>({
+    name: '',
+    email: '',
+    phone: ''
+  });
+  const [currentStep, setCurrentStep] = useState<'initial' | 'name' | 'email' | 'phone' | 'complete'>('initial');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,48 +35,127 @@ const AIChatbot: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
 
-    // If message contains calendar-related keywords, show DatePicker
-    if (inputMessage.toLowerCase().includes('calendar') || 
-        inputMessage.toLowerCase().includes('schedule') || 
-        inputMessage.toLowerCase().includes('booking')) {
-      setMessages(prev => [...prev, {
-        text: "Please select your preferred date:",
-        isUser: false
-      }]);
-      // Add DatePicker message
-      setMessages(prev => [...prev, {
-        text: `<div class="w-full">
-          <div class="booking-datepicker-container"></div>
-        </div>`,
-        isUser: false
-      }]);
-      return;
-    }
+    // Handle the conversation flow
+    if (currentStep === 'initial') {
+      if (inputMessage.toLowerCase().includes('book') || 
+          inputMessage.toLowerCase().includes('reserve') || 
+          inputMessage.toLowerCase().includes('schedule')) {
+        setCurrentStep('name');
+        setMessages(prev => [...prev, {
+          text: "Great! Let's get started with your booking. What's your full name?",
+          isUser: false
+        }]);
+      } else {
+        // Handle other inquiries using Formspree
+        try {
+          const formData = new FormData();
+          formData.append('message', inputMessage);
+          formData.append('timestamp', new Date().toLocaleString());
+          formData.append('type', 'chat_inquiry');
 
-    // Regular form submission for other messages
-    try {
-      await fetch('https://formsubmit.co/ajax/locuseventsinc@gmail.com', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          _subject: "New Chat Inquiry from Locus Website",
-          message: inputMessage,
-          timestamp: new Date().toLocaleString()
-        })
-      });
+          const response = await fetch('https://formspree.io/f/xldneeyz', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
 
+          if (response.ok) {
+            setMessages(prev => [...prev, {
+              text: "Thanks for your message! We'll get back to you soon. Would you like to make a booking?",
+              isUser: false
+            }]);
+          } else {
+            throw new Error('Failed to send message');
+          }
+        } catch (error) {
+          setMessages(prev => [...prev, {
+            text: "Sorry, there was an error sending your message. Please try again.",
+            isUser: false
+          }]);
+        }
+      }
+    } else if (currentStep === 'name') {
+      setUserInfo(prev => ({ ...prev, name: inputMessage }));
+      setCurrentStep('email');
       setMessages(prev => [...prev, {
-        text: "Thanks for your message! We'll get back to you soon.",
+        text: `Nice to meet you, ${inputMessage}! What's your email address?`,
         isUser: false
       }]);
-    } catch (error) {
+    } else if (currentStep === 'email') {
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(inputMessage)) {
+        setMessages(prev => [...prev, {
+          text: "Please enter a valid email address.",
+          isUser: false
+        }]);
+        return;
+      }
+      setUserInfo(prev => ({ ...prev, email: inputMessage }));
+      setCurrentStep('phone');
       setMessages(prev => [...prev, {
-        text: "Sorry, there was an error sending your message. Please try again.",
+        text: "And what's your phone number?",
         isUser: false
       }]);
+    } else if (currentStep === 'phone') {
+      // Basic phone validation
+      const phoneRegex = /^[\d\s\-\(\)]+$/;
+      if (!phoneRegex.test(inputMessage)) {
+        setMessages(prev => [...prev, {
+          text: "Please enter a valid phone number.",
+          isUser: false
+        }]);
+        return;
+      }
+      setUserInfo(prev => ({ ...prev, phone: inputMessage }));
+      setCurrentStep('complete');
+      setMessages(prev => [...prev, {
+        text: "Perfect! I have all your information. Would you like to proceed with selecting a date for your event?",
+        isUser: false
+      }]);
+    } else if (currentStep === 'complete') {
+      if (inputMessage.toLowerCase().includes('yes') || 
+          inputMessage.toLowerCase().includes('sure') || 
+          inputMessage.toLowerCase().includes('okay')) {
+        // Submit booking request to Formspree
+        try {
+          const formData = new FormData();
+          formData.append('name', userInfo.name);
+          formData.append('email', userInfo.email);
+          formData.append('phone', userInfo.phone);
+          formData.append('type', 'booking_request');
+          formData.append('timestamp', new Date().toLocaleString());
+
+          const response = await fetch('https://formspree.io/f/xldneeyz', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            // Close chat and open booking modal with pre-filled information
+            setIsOpen(false);
+            openBookingModal();
+          } else {
+            throw new Error('Failed to submit booking request');
+          }
+        } catch (error) {
+          setMessages(prev => [...prev, {
+            text: "Sorry, there was an error submitting your booking request. Please try again or contact us directly.",
+            isUser: false
+          }]);
+        }
+      } else {
+        setMessages(prev => [...prev, {
+          text: "No problem! You can always come back to book later. Is there anything else I can help you with?",
+          isUser: false
+        }]);
+        setCurrentStep('initial');
+      }
     }
   };
 
@@ -162,6 +255,18 @@ const AIChatbot: React.FC = () => {
                 </button>
               </div>
             </form>
+            {/* Book Now Button */}
+            <div className="p-4 border-t flex justify-center">
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  openBookingModal();
+                }}
+                className="w-full bg-[#EBC17D] text-[#05190E] px-6 py-2 rounded-md font-semibold hover:bg-[#C08329] transition-colors"
+              >
+                Book Now
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
