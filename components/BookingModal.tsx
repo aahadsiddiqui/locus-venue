@@ -91,10 +91,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
     
     // Validate guest count
     const guestCount = parseInt(formData.guestCount);
-    if (guestCount < 1 || guestCount > 200) {
+    if (guestCount < 1 || guestCount > 130) {
       toast.error(
         <div className="font-medium">
-          Guest count must be between 1 and 200
+          Guest count must be between 1 and 130
         </div>,
         {
           duration: 4000,
@@ -335,11 +335,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
                         name="guestCount"
                         required
                         min="1"
-                        max="200"
+                        max="130"
                         value={formData.guestCount}
                         onChange={(e) => setFormData({ ...formData, guestCount: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#EBC17D]"
-                        placeholder="Number of guests (1-200)"
+                        placeholder="Number of guests (1-130)"
                       />
                     </div>
                   </div>

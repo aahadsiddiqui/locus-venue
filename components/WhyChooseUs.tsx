@@ -13,7 +13,7 @@ const WhyChooseUs: React.FC = () => {
     {
       icon: <FaUsers className="text-4xl" />,
       title: "Flexible Capacity",
-      description: "Accommodate 20-200 guests comfortably",
+      description: "Accommodate 20-130 guests comfortably",
     },
     {
       icon: <FaGlassCheers className="text-4xl" />,

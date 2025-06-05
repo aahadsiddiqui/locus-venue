@@ -177,7 +177,7 @@ const features = [
   {
     icon: <FaUsers />,
     title: "Flexible Capacity",
-    description: "Accommodate 20-200 guests comfortably"
+    description: "Accommodate 20-130 guests comfortably"
   },
   {
     icon: <FaGlassCheers />,

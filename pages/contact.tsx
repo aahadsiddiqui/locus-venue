@@ -148,7 +148,7 @@ const ContactPage = () => {
                     id="guestCount"
                     name="guestCount"
                     min="1"
-                    max="200"
+                    max="130"
                     required
                     value={formData.guestCount}
                     onChange={handleChange}

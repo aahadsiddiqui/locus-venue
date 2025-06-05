@@ -168,7 +168,7 @@ const GalleryPage = () => {
             <div className="text-white">
               <FaUsers className="text-4xl text-[#EBC17D] mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2">Flexible Capacity</h3>
-              <p className="text-[#F4E8D9]">Accommodating 20-200 guests comfortably</p>
+              <p className="text-[#F4E8D9]">Accommodating 20-130 guests comfortably</p>
             </div>
             <div className="text-white">
               <FaLightbulb className="text-4xl text-[#EBC17D] mx-auto mb-4" />
