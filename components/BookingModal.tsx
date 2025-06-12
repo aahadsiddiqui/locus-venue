@@ -117,6 +117,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
         },
         body: JSON.stringify({
           _subject: "New Booking Request from Locus Venue",
+          _template: "table",
+          _captcha: "false",
+          _autoresponse: "Thank you for your booking request at Locus Venue. We have received your inquiry and will contact you shortly to confirm your event details.",
+          _replyto: formData.email,
           name: formData.name,
           email: formData.email,
           phone: formData.phone,

@@ -1,7 +1,6 @@
 import React from 'react';
 import Navbar from './Navbar';
 import BookingModal from './BookingModal';
-import AIChatbot from './AIChatbot';
 import { useBookingModal } from '../contexts/BookingModalContext';
 import { useRouter } from 'next/router';
 import { FaPhone, FaEnvelope } from 'react-icons/fa';
@@ -25,7 +24,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         isOpen={isBookingModalOpen}
         onClose={closeBookingModal}
       />
-      <AIChatbot />
       <footer className="bg-[#05190E] text-white py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-start">
